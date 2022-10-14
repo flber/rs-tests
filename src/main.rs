@@ -1,31 +1,36 @@
 use std::env;
 use std::fs;
 
-const TEST_PATH: &str = "test.txt";
+const DEFAULT_TEST_PATH: &str = "test-95.txt";
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
-	let contents = fs::read_to_string(TEST_PATH).unwrap();
 
-	let mut spaces = 0;
-	match &args[..] {
-		[_] => println!("please provide options"),
-		[_, cmd] => match cmd.as_str() {
-			"iter" => {
-				spaces = test_iter(&contents);
-			}
-			"loop" => {
-				spaces = test_loop(&contents);
-			}
-			"for" => {
-				spaces = test_for(&contents);
-			}
-			_ => (),
-		},
-		_ => (),
-	}
+	let spaces = match &args[..] {
+		[_, cmd] => parse_input(cmd, None),
+		[_, cmd, path] => parse_input(cmd, Some(path)),
+		_ => 0,
+	};
 
 	println!("number of spaces: {}", spaces);
+}
+
+fn parse_input(cmd: &String, path: Option<&str>) -> i32 {
+	let mut spaces = 0;
+	let contents = fs::read_to_string(path.unwrap_or_else(|| DEFAULT_TEST_PATH)).unwrap();
+	match cmd.as_str() {
+		"iter" => {
+			spaces = test_iter(&contents);
+		}
+		"loop" => {
+			spaces = test_loop(&contents);
+		}
+		"for" => {
+			spaces = test_for(&contents);
+		}
+		_ => (),
+	}
+	spaces
 }
 
 ///  Benchmark 1: ./target/release/rs-tests iter
