@@ -19,23 +19,17 @@ fn parse_input(cmd: &String, path: Option<&str>) -> i32 {
 	let mut spaces = 0;
 	let contents = fs::read_to_string(path.unwrap_or_else(|| DEFAULT_TEST_PATH)).unwrap();
 	match cmd.as_str() {
-		"iter" => {
-			spaces = test_iter(&contents);
-		}
-		"loop" => {
-			spaces = test_loop(&contents);
-		}
-		"for" => {
-			spaces = test_for(&contents);
-		}
+		"iter" => spaces = test_iter(&contents),
+		"for" => spaces = test_for(&contents),
+		"bytes" => spaces = test_bytes(&contents),
 		_ => (),
 	}
 	spaces
 }
 
 ///  Benchmark 1: ./target/release/rs-tests iter
-///  Time (mean ± σ):     410.6 ms ±   2.8 ms    [User: 358.8 ms, System: 50.1 ms]
-///  Range (min … max):   406.6 ms … 417.5 ms    100 runs
+///  Time (mean ± σ):     259.2 ms ±   2.4 ms    [User: 225.7 ms, System: 32.6 ms]
+///  Range (min … max):   254.8 ms … 265.3 ms    100 runs
 fn test_iter(contents: &String) -> i32 {
 	let mut spaces = 0;
 	for (_, c) in contents.chars().into_iter().enumerate() {
@@ -47,32 +41,28 @@ fn test_iter(contents: &String) -> i32 {
 	spaces
 }
 
-///  Benchmark 1: ./target/release/rs-tests loop
-///  Time (mean ± σ):     451.4 ms ±   2.5 ms    [User: 399.3 ms, System: 50.7 ms]
-///  Range (min … max):   445.2 ms … 457.5 ms    100 runs
-fn test_loop(contents: &String) -> i32 {
+///  Benchmark 1: ./target/release/rs-tests for
+///  Time (mean ± σ):     165.4 ms ±   3.6 ms    [User: 131.4 ms, System: 32.8 ms]
+///  Range (min … max):   161.8 ms … 181.2 ms    100 runs
+fn test_for(contents: &String) -> i32 {
 	let mut spaces = 0;
-	let mut it = contents.chars().into_iter().enumerate();
-	loop {
-		match it.next() {
-			Some((_, x)) => match x {
-				' ' => spaces += 1,
-				_ => (),
-			},
-			None => break,
+	for i in 0..contents.len() {
+		match &contents[i..i + 1] {
+			" " => spaces += 1,
+			_ => (),
 		}
 	}
 	spaces
 }
 
 ///  Benchmark 1: ./target/release/rs-tests for
-///  Time (mean ± σ):     262.4 ms ±   3.7 ms    [User: 210.0 ms, System: 50.9 ms]
-///  Range (min … max):   258.0 ms … 284.4 ms    100 runs
-fn test_for(contents: &String) -> i32 {
+///  Time (mean ± σ):      59.0 ms ±   2.9 ms    [User: 25.2 ms, System: 33.2 ms]
+///  Range (min … max):    55.7 ms …  65.2 ms    100 runs
+fn test_bytes(contents: &str) -> i32 {
 	let mut spaces = 0;
-	for i in 0..contents.len() {
-		match &contents[i..i + 1] {
-			" " => spaces += 1,
+	for (_, b) in contents.bytes().enumerate() {
+		match b {
+			b' ' => spaces += 1,
 			_ => (),
 		}
 	}
