@@ -1,6 +1,8 @@
 use std::env;
 use std::fs;
 
+use memchr::memchr;
+
 const DEFAULT_TEST_PATH: &str = "test-95.txt";
 
 fn main() {
@@ -22,6 +24,7 @@ fn parse_input(cmd: &String, path: Option<&str>) -> i32 {
 		"iter" => spaces = test_iter(&contents),
 		"for" => spaces = test_for(&contents),
 		"bytes" => spaces = test_bytes(&contents),
+		"memchr" => spaces = test_memchr(&contents),
 		_ => (),
 	}
 	spaces
@@ -55,7 +58,7 @@ fn test_for(contents: &String) -> i32 {
 	spaces
 }
 
-///  Benchmark 1: ./target/release/rs-tests for
+///  Benchmark 1: ./target/release/rs-tests bytes
 ///  Time (mean ± σ):      59.0 ms ±   2.9 ms    [User: 25.2 ms, System: 33.2 ms]
 ///  Range (min … max):    55.7 ms …  65.2 ms    100 runs
 fn test_bytes(contents: &str) -> i32 {
@@ -64,6 +67,25 @@ fn test_bytes(contents: &str) -> i32 {
 		match b {
 			b' ' => spaces += 1,
 			_ => (),
+		}
+	}
+	spaces
+}
+
+///  Benchmark 1: ./target/release/rs-tests memchr
+///  Time (mean ± σ):     121.3 ms ±   2.6 ms    [User: 86.8 ms, System: 33.5 ms]
+///  Range (min … max):   118.2 ms … 126.2 ms    100 runs
+fn test_memchr(contents: &str) -> i32 {
+	let bytes: &[u8] = contents.as_bytes();
+	let mut spaces = 0;
+	let mut index = 0;
+	loop {
+		match memchr(b' ', &bytes[index..]) {
+			Some(i) => {
+				index += i + 1;
+				spaces += 1;
+			}
+			None => break,
 		}
 	}
 	spaces
